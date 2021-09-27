@@ -1,0 +1,39 @@
+version: '2'
+services:
+  api:
+    build: ./
+    container_name: api_${build_version}
+    depends_on:
+            - db      
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_NAME: download_csv
+    ports:
+      - "${server_port}:8080"
+    expose:
+      - "8080"
+  start_dependencies:
+    image: dadarek/wait-for-dependencies
+    environment:
+      SLEEP_LENGTH: 10
+      TIMEOUT_LENGTH: 180     
+    depends_on:  
+      - api
+      - db  
+    command: api:8080 db:5432
+   
+  db:
+    image: postgres:9.6-alpine
+    container_name: db_${build_version}
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: download_csv
+    ports:
+      - "${db_port}:5432"
+    expose:
+      - "5432"
+
